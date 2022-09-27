@@ -18,4 +18,6 @@ npm run dev
 
 ## Resources
 
-No tutorial was used to complete this assignment. All online resources used are referenced in the comments in the code.
+- https://github.com/bibekg/react-schedule-selector
+
+No tutorial was used to complete this assignment.
