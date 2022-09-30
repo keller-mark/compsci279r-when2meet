@@ -49,6 +49,38 @@ body {
 .group-legend > div > span {
   flex-grow: 1;
 }
-.rgdp__grid-cell {
-  background-color: black;
+/*
+.group-selector{
+  position: relative;
+}
+.group-selector > div{
+  position: absolute;
+  top:0;
+  left:0;
+}
+*/
+.group-date-cell {
+  box-sizing: border-box;
+  width: 100%;
+  height: 26px;
+  border-bottom: 1px solid black;
+}
+.group-date-cell-inner {
+  width: 100%;
+  height: 25px;
+  padding: 1px;
+}
+.time-col, .you-col, .group-col {
+  width: 50%;
+}
+.group-selector > div > div {
+  column-gap: 0px;
+  row-gap: 0px;
+}
+.time-col-inner {
+  display: flex;
+  flex-direction: row;
+}
+.time-col-inner > div {
+  flex-grow: 1;
 }
