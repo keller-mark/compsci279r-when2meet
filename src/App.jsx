@@ -2,8 +2,10 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import range from 'lodash/range';
 import ScheduleSelector from 'react-schedule-selector';
 
+// Hard-code a start date for the time slots.
 const startDate = new Date("Dec 1 2022 12:30:00 GMT-0400");
 
+// Hard-code the availability of the other people.
 const people = {
   'John Doe': [
     new Date("Dec 1 2022 9:00:00 GMT-0500"),
@@ -47,36 +49,61 @@ const people = {
   ],
 };
 
+// Hard-code the maximum number of people that may attend any given time slot.
+const maxNum = Object.keys(people).length + 1;
+
+// Implement a React component which represents a date/time cell
+// that accounts for the number of people available, and
+// computes a background color with opacity using RGBA based on availability.
 function DateCell(props) {
   const {
+    // The datetime and selected props are passed from the ScheduleSelector
+    // renderDateCell parameters.
     datetime,
     selected,
+    // The setHovered is passed from the parent to set the hover state,
+    // including the hovered datetime, and the names of people available for the datetime.
     setHovered,
   } = props;
+
+  // Filter the names of the people to get a list of who is available at this datetime.
   const others = Object.entries(people)
     .filter(([name, times]) => {
+      // Do string comparison to check whether the datetimes match.
       return times.map(t => t.toString()).includes(datetime.toString())
     })
+    // Convert from [key, val] to only key.
     .map(([name]) => name);
+  
+  // Compute the number of people attending. Add an extra count for the current user if they have selected this datetime.
   const numAttending = (selected ? 1 : 0) + others.length;
-  const opacity = numAttending > 0 ? `${numAttending / 3.0}` : `1.0`;
+  // Compute the opacity based on the number of people.
+  const opacity = numAttending > 0 ? `${numAttending / maxNum}` : `1.0`;
 
+  // Get a React ref to the element to add mouse hover handlers.
   const cellRef = useRef();
+  // Add (and clean up) the hover handlers in a React effect.
   useEffect(() => {
+    // Define the hover handler, which calls the setHover to set the parent hover state.
     function handleHover(event) {
       let otherNames = others;
       if(selected) {
+        // Append "You" for the current user if necessary.
         otherNames = [...others, "You"];
       }
+      // The hover state is a tuple like (datetime, names) where names is an array of strings.
       setHovered([datetime, otherNames]);
     }
+    // Define the un-hover handler, which sets the hover state to Null.
     function handleLeave(event) {
       setHovered(null);
     }
+    // Add the handlers.
     if(cellRef.current) {
       cellRef.current.addEventListener('mouseenter', handleHover);
       cellRef.current.addEventListener('mouseout', handleLeave);
     }
+    // Define the cleanup function.
     return () => {
       if(cellRef.current) {
         cellRef.current.removeEventListener('mouseenter', handleHover);
@@ -84,7 +111,7 @@ function DateCell(props) {
       }
     }
   }, [cellRef, datetime, others, selected]);
-  
+  // Return the styled <div/>.
   return (
     <div className="group-date-cell" ref={cellRef}>
       <div className="group-date-cell-inner" style={{backgroundColor: numAttending > 0 ? `rgba(51, 153, 0, ${opacity}` : null }}></div>
@@ -95,20 +122,24 @@ function DateCell(props) {
 // Define the top-level <App/> component
 // which is exported and rendered from ./main.jsx.
 function App() {
-
+  // Define the state variables.
+  // One for the schedule passed to ScheduleSelector, an array of Date objects,
+  // representing the time slots selected by the user.
   const [schedule, setSchedule] = useState([]);
+  // Another variable for the hover state,
+  // a tuple (datetime, names).
   const [hovered, setHovered] = useState(null);
 
+  // Define the ScheduleSelector onChange handler.
   const handleChange = useCallback((newSchedule) => {
     setSchedule(newSchedule);
   });
-
-  const maxNum = Object.keys(people).length + 1;
 
   return (
     <div>
       {/* The app title */}
       <div className="app">
+        {/* The event details */}
         <h4>When2meet</h4>
         <h2>Barbecue</h2>
         <p>
@@ -119,12 +150,15 @@ function App() {
         </p>
         <p><label>Your Time Zone:&nbsp;</label><select><option>America/New_York</option></select></p>
         <div className="main">
+          {/* When a particular Group Availability time slot has been hovered, show the list of available/unavailable names. */}
           {hovered ? (
             <div className="time-col">
+              {/* Show the fraction of people available for the hovered time slot */}
               <h3>{hovered ? hovered[1].length : 0}/{maxNum} Available</h3>
               <p>{hovered ? hovered[0].toString() : null}</p>
               <div className="time-col-inner">
                 <div>
+                  {/* Show the list of people available for the hovered time slot */}
                   <h5>Available</h5>
                   <ul>
                     {hovered ? hovered[1].map(name => (
@@ -133,8 +167,10 @@ function App() {
                   </ul>
                 </div>
                 <div>
+                  {/* Show the list of people who are NOT available for the hovered time slot */}
                   <h5>Unavailable</h5>
                   <ul>
+                    {/* Take the set difference between all people and those available. Reference: https://stackoverflow.com/a/1723220 */}
                     {hovered ? [...Object.keys(people), "You"].filter(name => !hovered[1].includes(name)).map(name => (
                       <li>{name}</li>
                     )) : null}
@@ -144,7 +180,9 @@ function App() {
             </div>
           ) : (
             <div className="you-col">
+              {/* When not hovering on the Group Availability, show the selection interface to the user. */}
               <h3>Your Availability</h3>
+              {/* Show the legend to denote which color means what. */}
               <div className="you-legend">
                 <label>Unavailable</label><span style={{ backgroundColor: '#ffdede' }}></span>
                 <label>Available</label><span style={{ backgroundColor: '#339900' }}></span>
@@ -169,11 +207,14 @@ function App() {
               </div>
             </div>
           )}
+          {/* Always show the group availability table. */}
           <div className="group-col">
             <h3>Group's Availability</h3>
+            {/* Show the legend to indicate which color means how many people, from light to dark -> least to most. */}
             <div className="group-legend">
               <label>0/{maxNum} Available</label>
               <div>
+                {/* Create colored elements in the range 0 to 3 inclusive. */}
                 {range(maxNum+1).map(i => (
                   <span style={{ backgroundColor: `rgba(51, 153, 0, ${i/(maxNum)}` }}></span>
                 ))}
@@ -182,6 +223,7 @@ function App() {
             </div>
             <p>Mouseover the Calendar to See Who Is Available</p>
             <div className="group-selector">
+              {/* To show the group availability, use a second ScheduleSelector, which is read-only (onChange is no-op) but reads the same selection state variable as the read-write user-input ScheduleSelector above. */}
               <ScheduleSelector
                 startDate={startDate}
                 selection={schedule}
@@ -198,6 +240,8 @@ function App() {
                 selectionScheme={'square'}
                 renderDateCell={(datetime, selected, refSetter) => {
                   return (
+                    // Render a custom datecell which takes into account the hard-coded "people" object
+                    // indicating others' availability.
                     <DateCell datetime={datetime} selected={selected} setHovered={setHovered} />
                   );
                 }}

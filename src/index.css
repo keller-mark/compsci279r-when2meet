@@ -1,4 +1,4 @@
-/* Style the app so that it looks more like Doodle. */
+/* Style the app so that it looks more like When2Meet. */
 body {
   margin: 0;
   /* Use a sans-serif font. */
@@ -9,6 +9,7 @@ body {
 .app {
   margin: 10px;
 }
+/* Use CSS flexbox to make rows and columns */
 .app .main {
   display: flex;
   flex-direction: row;
@@ -49,27 +50,7 @@ body {
 .group-legend > div > span {
   flex-grow: 1;
 }
-/*
-.group-selector{
-  position: relative;
-}
-.group-selector > div{
-  position: absolute;
-  top:0;
-  left:0;
-}
-*/
-.group-date-cell {
-  box-sizing: border-box;
-  width: 100%;
-  height: 26px;
-  border-bottom: 1px solid black;
-}
-.group-date-cell-inner {
-  width: 100%;
-  height: 25px;
-  padding: 1px;
-}
+
 .time-col, .you-col, .group-col {
   width: 50%;
 }
@@ -83,4 +64,16 @@ body {
 }
 .time-col-inner > div {
   flex-grow: 1;
+}
+/* Add custom styles for the <div/> returned by the renderDateCell function. */
+.group-date-cell {
+  box-sizing: border-box;
+  width: 100%;
+  height: 26px;
+  border-bottom: 1px solid black;
+}
+.group-date-cell-inner {
+  width: 100%;
+  height: 25px;
+  padding: 1px;
 }
