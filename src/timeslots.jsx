@@ -8,10 +8,10 @@ export const STATE = {
 
 export const TASK = {
   NONE: 0,
-  T1_W1: 1,
-  T1_W2: 2,
-  T2_W1: 3,
-  T2_W2: 4,
+  T1_WA: 1,
+  T1_WB: 2,
+  T2_WA: 3,
+  T2_WB: 4,
 };
 
 export const TASK_REV = Object.fromEntries(Object.entries(TASK).map(([k, v]) => ([v, k])));
