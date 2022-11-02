@@ -1,62 +1,15 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import range from 'lodash/range';
 import ScheduleSelector from 'react-schedule-selector';
-
-// Hard-code a start date for the time slots.
-const startDate = new Date("Dec 1 2022 12:30:00 GMT-0400");
-
-// Hard-code the availability of the other people.
-const people = {
-  'John Doe': [
-    new Date("Dec 1 2022 9:00:00 GMT-0500"),
-    new Date("Dec 1 2022 9:30:00 GMT-0500"),
-    new Date("Dec 1 2022 10:00:00 GMT-0500"),
-    new Date("Dec 1 2022 10:30:00 GMT-0500"),
-    new Date("Dec 1 2022 13:00:00 GMT-0500"),
-    new Date("Dec 1 2022 13:30:00 GMT-0500"),
-    new Date("Dec 1 2022 14:00:00 GMT-0500"),
-    new Date("Dec 1 2022 14:30:00 GMT-0500"),
-
-    new Date("Dec 3 2022 9:00:00 GMT-0500"),
-    new Date("Dec 3 2022 9:30:00 GMT-0500"),
-    new Date("Dec 3 2022 10:00:00 GMT-0500"),
-    new Date("Dec 3 2022 10:30:00 GMT-0500"),
-    new Date("Dec 3 2022 13:00:00 GMT-0500"),
-    new Date("Dec 3 2022 13:30:00 GMT-0500"),
-    new Date("Dec 3 2022 14:00:00 GMT-0500"),
-    new Date("Dec 3 2022 14:30:00 GMT-0500"),
-    
-    new Date("Dec 5 2022 12:00:00 GMT-0500"),
-    new Date("Dec 5 2022 12:30:00 GMT-0500"),
-    new Date("Dec 5 2022 13:00:00 GMT-0500"),
-    new Date("Dec 5 2022 13:30:00 GMT-0500"),
-    new Date("Dec 5 2022 14:00:00 GMT-0500"),
-    new Date("Dec 5 2022 14:30:00 GMT-0500"),
-    new Date("Dec 5 2022 15:00:00 GMT-0500"),
-    new Date("Dec 5 2022 15:30:00 GMT-0500"),
-  ],
-  'Jane Doe': [
-    new Date("Dec 1 2022 13:00:00 GMT-0500"),
-    new Date("Dec 1 2022 13:30:00 GMT-0500"),
-
-    new Date("Dec 2 2022 13:00:00 GMT-0500"),
-    new Date("Dec 2 2022 13:30:00 GMT-0500"),
-
-    new Date("Dec 5 2022 14:00:00 GMT-0500"),
-    new Date("Dec 5 2022 14:30:00 GMT-0500"),
-    new Date("Dec 5 2022 15:00:00 GMT-0500"),
-    new Date("Dec 5 2022 15:30:00 GMT-0500"),
-  ],
-};
-
-// Hard-code the maximum number of people that may attend any given time slot.
-const maxNum = Object.keys(people).length + 1;
+import { STATE } from './timeslots';
 
 // Implement a React component which represents a date/time cell
 // that accounts for the number of people available, and
 // computes a background color with opacity using RGBA based on availability.
 function DateCell(props) {
   const {
+    people,
+    maxNum,
     // The datetime and selected props are passed from the ScheduleSelector
     // renderDateCell parameters.
     datetime,
@@ -119,9 +72,92 @@ function DateCell(props) {
   );
 }
 
+
+// Hard-code the availability of the other people.
+const people = {
+  'Mark': [
+    new Date("Dec 1 2022 9:00:00 GMT-0500"),
+    new Date("Dec 1 2022 9:30:00 GMT-0500"),
+    new Date("Dec 1 2022 10:00:00 GMT-0500"),
+    new Date("Dec 1 2022 10:30:00 GMT-0500"),
+    new Date("Dec 1 2022 13:00:00 GMT-0500"),
+    new Date("Dec 1 2022 13:30:00 GMT-0500"),
+    new Date("Dec 1 2022 14:00:00 GMT-0500"),
+    new Date("Dec 1 2022 14:30:00 GMT-0500"),
+
+    new Date("Dec 3 2022 9:00:00 GMT-0500"),
+    new Date("Dec 3 2022 9:30:00 GMT-0500"),
+    new Date("Dec 3 2022 10:00:00 GMT-0500"),
+    new Date("Dec 3 2022 10:30:00 GMT-0500"),
+    new Date("Dec 3 2022 13:00:00 GMT-0500"),
+    new Date("Dec 3 2022 13:30:00 GMT-0500"),
+    new Date("Dec 3 2022 14:00:00 GMT-0500"),
+    new Date("Dec 3 2022 14:30:00 GMT-0500"),
+    
+    new Date("Dec 5 2022 12:00:00 GMT-0500"),
+    new Date("Dec 5 2022 12:30:00 GMT-0500"),
+    new Date("Dec 5 2022 13:00:00 GMT-0500"),
+    new Date("Dec 5 2022 13:30:00 GMT-0500"),
+    new Date("Dec 5 2022 14:00:00 GMT-0500"),
+    new Date("Dec 5 2022 14:30:00 GMT-0500"),
+    new Date("Dec 5 2022 15:00:00 GMT-0500"),
+    new Date("Dec 5 2022 15:30:00 GMT-0500"),
+  ],
+  'Jane Doe': [
+    new Date("Dec 1 2022 13:00:00 GMT-0500"),
+    new Date("Dec 1 2022 13:30:00 GMT-0500"),
+
+    new Date("Dec 2 2022 13:00:00 GMT-0500"),
+    new Date("Dec 2 2022 13:30:00 GMT-0500"),
+
+    new Date("Dec 5 2022 14:00:00 GMT-0500"),
+    new Date("Dec 5 2022 14:30:00 GMT-0500"),
+    new Date("Dec 5 2022 15:00:00 GMT-0500"),
+    new Date("Dec 5 2022 15:30:00 GMT-0500"),
+  ],
+};
+
 // Define the top-level <App/> component
 // which is exported and rendered from ./main.jsx.
-function App() {
+function App(props) {
+  const {
+    timeslots,
+    clearTask,
+  } = props;
+
+  const startDate = timeslots[0].start;
+
+  // Convert others' availability to the people array.
+  const [people, maxNum] = useMemo(() => {
+    const names = Object.keys(timeslots[0].states);
+    const result = {};
+    names.forEach(name => {
+      result[name] = [];
+    });
+
+    timeslots.forEach(timeslot => {
+      const { start, end, states } = timeslot;
+      Object.entries(states).forEach(([name, state]) => {
+        if(state === STATE.YES) {
+          // TODO: should every time _except_ those with STATE.NO be included?
+          //result[name].push(start);
+          const endMs = end.getTime();
+          const startMs = start.getTime();
+          const msPerHour = 60 * 60 * 1000;
+          const intervalMs = msPerHour / 2;
+          const numIntervals = (endMs - startMs) / intervalMs;
+          range(numIntervals).forEach(i => {
+            result[name].push(new Date(startMs + intervalMs * i));
+          });
+        }
+      });
+    });
+
+    const maxResult = Object.keys(result).length + 1;
+
+    return [result, maxResult];
+  }, [timeslots]);
+
   // Define the state variables.
   // One for the schedule passed to ScheduleSelector, an array of Date objects,
   // representing the time slots selected by the user.
@@ -134,6 +170,10 @@ function App() {
   const handleChange = useCallback((newSchedule) => {
     setSchedule(newSchedule);
   });
+
+  function handleSubmit() {
+    clearTask(schedule);
+  }
 
   return (
     <div>
@@ -242,13 +282,20 @@ function App() {
                   return (
                     // Render a custom datecell which takes into account the hard-coded "people" object
                     // indicating others' availability.
-                    <DateCell datetime={datetime} selected={selected} setHovered={setHovered} />
+                    <DateCell
+                      people={people}
+                      maxNum={maxNum}
+                      datetime={datetime}
+                      selected={selected}
+                      setHovered={setHovered}
+                    />
                   );
                 }}
               />
             </div>
           </div>
         </div>
+        <button onClick={handleSubmit}>Done</button>
       </div>
     </div>
   )
