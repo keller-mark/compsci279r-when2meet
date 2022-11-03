@@ -49,35 +49,36 @@ export default function Intro() {
 
   const message = useMemo(() => {
     if(prevTask === null || prevTask === undefined) {
-      return 'No previous task.';
+      return null;
     }
     return (
-      <div>Previous task {TASK_REV[prevTask]} info saved.</div>
+      <div>Task info saved.</div>
     );
   }, [endTime]);
 
   const buttons = useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const weekId = urlParams.get('week');
-    if(!weekId) {
+    const taskId = urlParams.get('task');
+    if(!weekId || !taskId) {
       return null;
     }
 
     if(weekId.toLowerCase() === 'a') {
-      return (
-        <div>
-          <button onClick={() => startTask(TASK.T1_WA)}>Task 1 (Jan 2)</button>&nbsp;
-          <button onClick={() => startTask(TASK.T2_WA)}>Task 2 (next week)</button>
-        </div>
-      );
+      if(taskId === '1') {
+        return (<button onClick={() => startTask(TASK.T1_WA)}>Task 1 (Jan 2)</button>);
+      }
+      if(taskId === '2') {
+        return (<button onClick={() => startTask(TASK.T2_WA)}>Task 2 (next week)</button>);
+      }
     }
     if(weekId.toLowerCase() === 'b') {
-      return (
-        <div>
-          <button onClick={() => startTask(TASK.T1_WB)}>Task 1 (Jan 9)</button>&nbsp;
-          <button onClick={() => startTask(TASK.T2_WB)}>Task 2 (two weeks)</button>
-        </div>
-      );
+      if(taskId === '1') {
+        return  (<button onClick={() => startTask(TASK.T1_WB)}>Task 1 (Jan 9)</button>);
+      }
+      if(taskId === '2') {
+        return (<button onClick={() => startTask(TASK.T2_WB)}>Task 2 (two weeks)</button>);
+      }
     }
   }, [window.location.search]);
 
