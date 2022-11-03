@@ -56,18 +56,37 @@ export default function Intro() {
     );
   }, [endTime]);
 
+  const buttons = useMemo(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const weekId = urlParams.get('week');
+    if(!weekId) {
+      return null;
+    }
+
+    if(weekId.toLowerCase() === 'a') {
+      return (
+        <div>
+          <button onClick={() => startTask(TASK.T1_WA)}>Task 1 (Jan 2)</button>&nbsp;
+          <button onClick={() => startTask(TASK.T2_WA)}>Task 2 (next week)</button>
+        </div>
+      );
+    }
+    if(weekId.toLowerCase() === 'b') {
+      return (
+        <div>
+          <button onClick={() => startTask(TASK.T1_WB)}>Task 1 (Jan 9)</button>&nbsp;
+          <button onClick={() => startTask(TASK.T2_WB)}>Task 2 (two weeks)</button>
+        </div>
+      );
+    }
+  }, [window.location.search]);
+
   return (
     <div>
       {currTask === TASK.NONE ? (
         <div>
           <p>{message}</p>
-          <p>
-            <button onClick={() => startTask(TASK.T1_WA)}>Task 1 (Jan 2)</button>
-            <button onClick={() => startTask(TASK.T2_WA)}>Task 2 (next week)</button>
-            <br/><br/>
-            <button onClick={() => startTask(TASK.T1_WB)}>Task 1 (Jan 9)</button>
-            <button onClick={() => startTask(TASK.T2_WB)}>Task 2 (two weeks)</button>
-          </p>
+          {buttons}
         </div>
       ) : null}
       {currTask === TASK.T1_WA ? (

@@ -295,7 +295,9 @@ function App(props) {
             </div>
           </div>
         </div>
-        <button onClick={handleSubmit}>Done</button>
+        <div style={{ textAlign: 'right', marginTop: '10px', marginBottom: '100px', width: '350px' }}>
+          <button onClick={handleSubmit}>Continue</button>
+        </div>
       </div>
     </div>
   )
