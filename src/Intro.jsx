@@ -2,6 +2,17 @@ import { useState, useCallback, useMemo } from 'react';
 import App from './App';
 import { TASK_REV, TASK, t1_jan2, t1_jan9, t2_nextweek, t2_twoweeks } from './timeslots';
 
+// Reference: https://stackoverflow.com/a/30800715
+function downloadObjectAsJson(exportObj, exportName){
+  var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+  var downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.setAttribute("href",     dataStr);
+  downloadAnchorNode.setAttribute("download", exportName + ".json");
+  document.body.appendChild(downloadAnchorNode); // required for firefox
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
+}
+
 export default function Intro() {
   const [currTask, setCurrTask] = useState(TASK.NONE);
   const [startTime, setStartTime] = useState();
@@ -16,21 +27,32 @@ export default function Intro() {
 
   const clearTask = useCallback((selections) => {
     setUserSelections(selections);
-    setEndTime(Date.now());
-    setPrevTask(currTask);
+    const nextEndTime = Date.now();
+    const prevTask = currTask;
+    setEndTime(nextEndTime);
+    setPrevTask(prevTask);
     setCurrTask(TASK.NONE);
+
+    const delta = nextEndTime - startTime;
+
+    downloadObjectAsJson({
+      app: 'when2meet',
+      taskId: prevTask,
+      task: TASK_REV[prevTask],
+      time: delta,
+      timeUnit: 'ms',
+      timeString: `${Math.floor(delta / 1000)} seconds`,
+      // Clear the timeslot.states property before saving
+      selections,
+    }, `when2meet_${TASK_REV[prevTask]}_${(new Date(nextEndTime)).toISOString()}`);
   }, [startTime]);
 
   const message = useMemo(() => {
     if(prevTask === null || prevTask === undefined) {
-      return 'No previous task';
+      return 'No previous task.';
     }
-    const delta = endTime - startTime;
     return (
-      <>
-        <div>Previous task {TASK_REV[prevTask]} took {Math.floor(delta / 1000)} seconds</div>
-        <pre>{JSON.stringify(userSelections, null, 2)}</pre>
-      </>
+      <div>Previous task {TASK_REV[prevTask]} info saved.</div>
     );
   }, [endTime]);
 
