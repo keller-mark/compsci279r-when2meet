@@ -2,7 +2,7 @@
 
 ## How to open hosted version
 
-Navigate to https://keller-mark.github.io/compsci279r-when2meet/ in a web browser.
+Navigate to https://keller-mark.github.io/compsci279r-when2meet/?task=1&week=a in a web browser.
 
 ## How to open locally
 
